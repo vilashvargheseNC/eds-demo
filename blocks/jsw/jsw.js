@@ -46,15 +46,6 @@ function getHTMLTemplate() {
     <div class="hero-scroll"><span>SCROLL</span><span class="bar"></span></div>
   </section>
 
-  <!-- ============ STATEMENT ============ -->
-  <section class="block statement" data-screen-label="statement">
-    <div class="wrap">
-      <p class="kicker reveal" style="margin-bottom:26px">Hardcore by design</p>
-      <h2 class="reveal reveal-d1">Adventure isn't a place.<br/>It's a <em>posture.</em></h2>
-      <p class="reveal reveal-d2">4,785&nbsp;mm of presence. 220&nbsp;mm of clearance. A steel-cage body built to go further than the map.</p>
-    </div>
-  </section>
-
   <!-- ============ 360 SHOWCASE ============ -->
   <section class="showcase" id="design" data-screen-label="360 showcase">
     <div class="sticky">
@@ -113,31 +104,98 @@ function getHTMLTemplate() {
     </div>
   </section>
 
-  <!-- ============ INTERIOR SPLIT ============ -->
-  <section class="block" id="interior" data-screen-label="interior">
-    <div class="wrap split rev">
-      <div class="media reveal">
-        <img src="https://jetourglobal.com/new-static/images/vehicles/cars/T2/p1_2.png" alt="Jetour T2 cockpit"/>
+  <!-- ============ EXPLORE — statement + tabs (cockpit / off-road / upholstery) ============ -->
+  <section class="block explore" id="interior" data-screen-label="explore">
+    <div class="wrap">
+
+      <!-- Hardcore by design (statement) -->
+      <div class="statement">
+        <p class="kicker reveal" style="margin-bottom:26px">Hardcore by design</p>
+        <h2 class="reveal reveal-d1">Adventure isn't a place.<br/>It's a <em>posture.</em></h2>
+        <p class="reveal reveal-d2">4,785&nbsp;mm of presence. 220&nbsp;mm of clearance. A steel-cage body built to go further than the map.</p>
       </div>
-      <div class="copy">
-        <p class="kicker reveal">The cockpit</p>
-        <h2 class="reveal reveal-d1">A wide, calm<br/>place to <b>command.</b></h2>
-        <p class="reveal reveal-d2">A clean, horizontal dashboard wrapped in soft-touch materials, crowned by a 15.6-inch floating display and a 12-speaker Sony system.</p>
-        <div class="mini-specs reveal reveal-d2">
-          <div>
-            <div class="n">15.6<span>"</span></div>
-            <div class="l">Touchscreen</div>
+
+      <!-- Tabs -->
+      <div class="tabs reveal">
+        <div class="tablist" role="tablist">
+          <button class="tab is-active" data-tab="cockpit" role="tab">The Cockpit</button>
+          <button class="tab" data-tab="offroad" role="tab">Off-road Performance</button>
+          <button class="tab" data-tab="upholstery" role="tab">Upholstery</button>
+        </div>
+
+        <div class="tabpanels">
+
+          <!-- Cockpit -->
+          <div class="tabpanel is-active" data-panel="cockpit" role="tabpanel">
+            <div class="split rev">
+              <div class="media">
+                <img src="https://jetourglobal.com/new-static/images/vehicles/cars/T2/p1_2.png" alt="Jetour T2 cockpit"/>
+              </div>
+              <div class="copy">
+                <p class="kicker">The cockpit</p>
+                <h2>A wide, calm<br/>place to <b>command.</b></h2>
+                <p>A clean, horizontal dashboard wrapped in soft-touch materials, crowned by a 15.6-inch floating display and a 12-speaker Sony system.</p>
+                <div class="mini-specs">
+                  <div><div class="n">15.6<span>"</span></div><div class="l">Touchscreen</div></div>
+                  <div><div class="n">10.25<span>"</span></div><div class="l">Digital cluster</div></div>
+                  <div><div class="n">12</div><div class="l">Sony speakers</div></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <div class="n">10.25<span>"</span></div>
-            <div class="l">Digital cluster</div>
+
+          <!-- Off-road Performance -->
+          <div class="tabpanel" data-panel="offroad" role="tabpanel">
+            <div class="offroad-intro">
+              <p class="kicker">Off-road performance</p>
+              <h3>Engineered to go <b>further.</b></h3>
+            </div>
+            <div class="offroad-grid">
+              <div class="offroad-card">
+                <div class="pic"><img src="https://jetourglobal.com/new-static/images/vehicles/cars/T2/p3_1.png" alt="Comprehensive equipment" loading="lazy"/></div>
+                <div class="ttl">Comprehensive equipment</div>
+                <div class="cap">Hardware that meets every imagination — ready for any terrain.</div>
+              </div>
+              <div class="offroad-card">
+                <div class="pic"><img src="https://jetourglobal.com/new-static/images/vehicles/cars/T2/p3_2.png" alt="Kunpeng Power" loading="lazy"/></div>
+                <div class="ttl">Kunpeng Power</div>
+                <div class="cap">Both explosiveness and endurance from the turbocharged unit.</div>
+              </div>
+              <div class="offroad-card">
+                <div class="pic"><img src="https://jetourglobal.com/new-static/images/vehicles/cars/T2/p3_3.png" alt="Steel-cage body" loading="lazy"/></div>
+                <div class="ttl">Steel-cage body</div>
+                <div class="cap">A high-strength steel safety structure wraps the cabin.</div>
+              </div>
+              <div class="offroad-card">
+                <div class="pic"><img src="https://jetourglobal.com/new-static/images/vehicles/cars/T2/p3_4.png" alt="High-density roof" loading="lazy"/></div>
+                <div class="ttl">High-density roof</div>
+                <div class="cap">Arrayed high-density roof, built to carry the adventure.</div>
+              </div>
+            </div>
           </div>
-          <div>
-            <div class="n">12</div>
-            <div class="l">Sony speakers</div>
+
+          <!-- Upholstery -->
+          <div class="tabpanel" data-panel="upholstery" role="tabpanel">
+            <div class="split">
+              <div class="media">
+                <img src="https://stimg.cardekho.com/images/cms/carnewsimages/editorimages/699ee0a57c431.jpg" alt="Jetour T2 upholstery" loading="lazy"/>
+              </div>
+              <div class="copy">
+                <p class="kicker">Upholstery</p>
+                <h2>Dressed for the<br/><b>long way round.</b></h2>
+                <p>Choose an all-black cabin with contrast stitching, or a warmer tan theme. Either way, soft-touch surfaces, ventilated and massaging front seats, and a panoramic sunroof set the mood.</p>
+                <div class="mini-specs">
+                  <div><div class="n">2</div><div class="l">Cabin themes</div></div>
+                  <div><div class="n">5</div><div class="l">Seats</div></div>
+                  <div><div class="n">CN95</div><div class="l">Air filter</div></div>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
+
     </div>
   </section>
 

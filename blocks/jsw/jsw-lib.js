@@ -104,6 +104,19 @@
 
   /* ---------- Specs accordion (mobile single-open is fine open) ---------- */
 
+  /* ---------- Tabs (cockpit / off-road / upholstery) ---------- */
+  document.querySelectorAll('.tabs').forEach(function(tabs){
+    var btns = tabs.querySelectorAll('.tab');
+    var panels = tabs.querySelectorAll('.tabpanel');
+    btns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var key = btn.getAttribute('data-tab');
+        btns.forEach(function(b){ b.classList.toggle('is-active', b===btn); });
+        panels.forEach(function(p){ p.classList.toggle('is-active', p.getAttribute('data-panel')===key); });
+      });
+    });
+  });
+
   /* ---------- master scroll loop (rAF throttled) ---------- */
   var ticking = false;
   function tick(){
