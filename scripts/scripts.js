@@ -155,7 +155,7 @@ async function loadEager(doc) {
  * @param {Element} doc The container element
  */
 async function loadLazy(doc) {
-  loadHeader(doc.querySelector('header'));
+  // loadHeader(doc.querySelector('header'));
 
   const main = doc.querySelector('main');
   await loadSections(main);
