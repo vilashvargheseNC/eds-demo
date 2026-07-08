@@ -1,0 +1,50 @@
+.download-list {
+  border: 1px solid var(--dark-color);
+  padding: 24px;
+}
+
+.download-list-heading {
+  margin: 0 0 16px;
+  font-size: var(--body-font-size-s);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.download-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.download-list-items li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-list-items .icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.download-list-view-all {
+  margin: 16px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--light-color);
+}
+
+.download-list-view-all a {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+@media (width >= 600px) {
+  .download-list {
+    max-width: 320px;
+  }
+}

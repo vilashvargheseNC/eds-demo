@@ -1,0 +1,81 @@
+.carousel {
+  position: relative;
+}
+
+.carousel-track {
+  overflow: hidden;
+}
+
+.carousel-slides {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform: translateX(calc(var(--carousel-index, 0) * -100%));
+  transition: transform 0.3s ease;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+}
+
+.carousel-slide picture,
+.carousel-slide img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.carousel-arrow-prev {
+  left: 8px;
+}
+
+.carousel-arrow-next {
+  right: 8px;
+}
+
+.carousel-arrow-prev::before {
+  content: '‹';
+}
+
+.carousel-arrow-next::before {
+  content: '›';
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--light-color);
+  cursor: pointer;
+}
+
+.carousel-dot[aria-current='true'] {
+  background-color: var(--text-color);
+}
