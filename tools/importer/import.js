@@ -77,31 +77,41 @@ const createCarousel = (main, document) => {
 };
 
 const createFeatures = (main, document) => {
-  const wrapper = main.querySelector('.paragraph--type--bp-columns');
-  if (!wrapper) return;
+  // Product pages have 1-N ".paragraph--type--bp-columns" instances stacked
+  // inside one shared grey background section (e.g. Dura-Care 7200 has one
+  // "Features and Benefits"; Dura-Care 7000TL has two: "The Dura-Care
+  // Difference" then a reverse-order "Features and Benefits"). Each becomes
+  // its own "columns" block, using the source DOM's own column order -
+  // "component-style--reverse-responsive" instances already put the text
+  // column before the image column in the markup itself, so no special
+  // casing is needed, just preserve document order.
+  const instances = [...main.querySelectorAll('.paragraph--type--bp-columns')];
+  if (!instances.length) return;
 
-  const img = wrapper.querySelector('.paragraph--type--bp-image img');
-  const heading = wrapper.querySelector('.component-wysiwyg__header h2');
-  const list = wrapper.querySelector('.component-wysiwyg__text ul');
+  const outerSection = instances[0].closest('.paragraph--type--background') || instances[0].parentElement;
 
-  const textCell = document.createElement('div');
-  if (heading) textCell.append(heading);
-  if (list) textCell.append(list);
+  const tables = instances.map((instance) => {
+    const cols = [...instance.querySelectorAll(':scope > .content-column-wrapper > .paragraph--type--bp-columns__2col')];
+    const cells = cols.map((col) => {
+      const img = col.querySelector('.paragraph--type--bp-image img');
+      if (img) return img;
 
-  const cells = [
-    ['columns'],
-    [img, textCell],
-  ];
+      const heading = col.querySelector('.component-wysiwyg__header h2');
+      const list = col.querySelector('.component-wysiwyg__text ul');
+      const para = col.querySelector('.component-wysiwyg__text p');
+      const cell = document.createElement('div');
+      if (heading) cell.append(heading);
+      if (list) cell.append(list);
+      else if (para) cell.append(para);
+      return cell;
+    });
+    return WebImporter.DOMUtils.createTable([['columns'], cells], document);
+  });
 
-  const table = WebImporter.DOMUtils.createTable(cells, document);
-  const section = wrapper.closest('.paragraph--type--background') || wrapper;
-  section.replaceWith(table);
-
-  const sectionBreak = document.createElement('hr');
-  table.after(sectionBreak);
+  outerSection.replaceWith(...tables);
 
   const metaCells = [['Section Metadata'], ['Style', 'grey']];
-  table.before(WebImporter.DOMUtils.createTable(metaCells, document));
+  tables[0].before(WebImporter.DOMUtils.createTable(metaCells, document));
 };
 
 const createModelShowcase = (main, document) => {

@@ -323,3 +323,25 @@ main .section.highlight {
   margin: 0;
   padding: 40px 0;
 }
+
+main .section.grey {
+  background-color: var(--light-color);
+  margin: 0;
+  padding: 40px 0;
+}
+
+main .section.dark {
+  background-color: var(--text-color);
+  color: var(--background-color);
+  margin: 0;
+  padding: 40px 0;
+}
+
+main .section.dark a:not(.button) {
+  color: var(--background-color);
+}
+
+/* cards keep their own light card background regardless of section theme */
+main .section.dark .cards a:not(.button) {
+  color: var(--link-color);
+}
