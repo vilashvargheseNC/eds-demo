@@ -1,11 +1,11 @@
 main .form input,
 main .form textarea,
 main .form select {
-  border: 1px solid rgba(0 0 0 / 10%);
+  border: 1px solid rgb(0 0 0 / 10%);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-m);
   line-height: 1.5;
-  color: var(--c-dark-plum);
+  color: var(--text-color);
   padding: 10px 16px;
   border-radius: 3px;
   width: 100%;
@@ -25,21 +25,21 @@ main .form textarea:hover,
 main .form textarea:focus,
 main .form select:hover,
 main .form select:focus {
-  border-color: var(--c-dark-plum);
+  border-color: var(--text-color);
   outline: 0;
 }
 
 main .form label {
   width: 100%;
   font-size: var(--body-font-size-m);
-  color: var(--c-dark-plum);
+  color: var(--text-color);
   display: block;
 }
 
 main .form label.required::after,
 main .form .checkbox-group-label.required::after {
   content: ' *';
-  color: var(--c-dark-plum);
+  color: var(--text-color);
 }
 
 main .form .field-wrapper {
@@ -47,7 +47,15 @@ main .form .field-wrapper {
   margin-bottom: 20px;
 }
 
-@media (min-width: 600px) {
+/* Helper text under a field, e.g. "Please do not include parenthesis" */
+main .form .field-description {
+  margin: 6px 0 0;
+  font-size: var(--body-font-size-xs);
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+@media (width >= 600px) {
   main .form .field-wrapper {
     margin-bottom: 36px;
   }
@@ -74,7 +82,7 @@ main .form .fields-row .field-wrapper textarea {
   max-width: none;
 }
 
-@media (min-width: 600px) {
+@media (width >= 600px) {
   main .form .fields-row {
     flex-direction: row;
     gap: 20px;
@@ -90,7 +98,7 @@ main .form .fields-row .field-wrapper textarea {
 main .form .checkbox-group-label {
   display: block;
   font-size: var(--body-font-size-m);
-  color: var(--c-dark-plum);
+  color: var(--text-color);
   margin-bottom: 8px;
 }
 
@@ -116,7 +124,7 @@ main .form .form-checkbox-wrapper label {
   cursor: pointer;
   user-select: none;
   font-size: var(--body-font-size-m);
-  color: var(--c-dark-plum);
+  color: var(--text-color);
 }
 
 /* Custom checkbox box */
@@ -127,21 +135,21 @@ main .form .form-checkbox-wrapper label::before {
   width: 20px;
   height: 20px;
   background-color: transparent;
-  border: 1px solid rgba(0 0 0 / 10%);
+  border: 1px solid rgb(0 0 0 / 10%);
   border-radius: 3px;
   content: '';
 }
 
 /* Hover state for custom checkbox */
 main .form .form-checkbox-wrapper label:hover::before {
-  border-color: var(--c-dark-plum);
+  border-color: var(--text-color);
 }
 
 /* Checked state for custom checkbox */
 main .form .form-checkbox-wrapper > input[type='checkbox']:checked + label::before,
 main .form .checkbox-item input[type='checkbox']:checked + label::before {
-  background-color: var(--c-dark-plum);
-  border-color: var(--c-dark-plum);
+  background-color: var(--text-color);
+  border-color: var(--text-color);
   /* stylelint-disable-next-line function-url-quotes */
   background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="-6527.959 872.109 12.577 12.688"%3E%3Cpath fill="none" stroke="%23fff" stroke-width="2px" d="M-6527.166%2C877.783l3.155%2C4.117%2C7.828-10.433" transform="translate%280 1.243%29"/%3E%3C%2Fsvg%3E');
   background-size: 12px;
@@ -162,25 +170,25 @@ main .form .button {
   margin-top: 30px;
   font-size: 12px;
   font-weight: 700;
-  color: var(--c-white);
+  color: var(--background-color);
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
   padding: 8px 35px;
   cursor: pointer;
-  background-color: var(--c-dark-plum);
-  border: 1px solid var(--c-dark-plum);
+  background-color: var(--text-color);
+  border: 1px solid var(--text-color);
   border-radius: 30px;
 }
 
 main .form .button:focus,
 main .form .button:hover {
-  color: var(--c-dark-plum);
+  color: var(--text-color);
   background-color: transparent;
   outline: 0;
 }
 
-@media (min-width: 770px) {
+@media (width >= 770px) {
   main .form .button {
     width: auto;
   }
@@ -196,6 +204,46 @@ main .form .form-error {
   margin-top: 12px;
   color: #db204c;
   font-size: var(--body-font-size-m);
+}
+
+/* Shared visibility toggle: field rules (Rules column) and multi-step steps */
+main .form .hidden {
+  display: none;
+}
+
+/* Multi-step form */
+main .form .form-progress {
+  margin-bottom: 20px;
+  font-size: var(--body-font-size-s);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-color);
+}
+
+main .form .form-step h2 {
+  margin-top: 0;
+}
+
+main .form .form-step-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+main .form .form-step-nav .form-step-back {
+  color: var(--text-color);
+  background-color: transparent;
+}
+
+main .form .form-step-nav .form-step-back:hover,
+main .form .form-step-nav .form-step-back:focus {
+  color: var(--background-color);
+  background-color: var(--text-color);
+}
+
+main .form .form-step-nav .form-step-next {
+  margin-left: auto;
 }
 
 /* Validation tooltip — matches Marketo's mktoError style */
@@ -232,7 +280,7 @@ main .form .field-tooltip-msg {
   min-width: 150px;
   max-width: 300px;
   padding: 10px;
-  color: var(--c-white);
+  color: var(--background-color);
   background-color: #db204c;
   border-radius: 3px;
   font-size: var(--body-font-size-m);

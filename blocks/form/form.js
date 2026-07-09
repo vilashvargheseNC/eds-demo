@@ -29,6 +29,28 @@ const t = (str, fallback) => placeholders[toCamelCase(str)] || fallback || str;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
+ * Splits an Options cell into a trimmed list. Newline-delimited when the
+ * value contains a newline (safe for option text with embedded commas),
+ * otherwise comma-delimited.
+ * @param {string} options
+ * @returns {string[]}
+ */
+function parseOptions(options = '') {
+  const delimiter = options.includes('\n') ? '\n' : ',';
+  return options.split(delimiter).map((o) => o.trim()).filter(Boolean);
+}
+
+/**
+ * Converts a hyphenated sheet name into a display title, e.g.
+ * "primary-details" → "Primary Details".
+ * @param {string} str
+ * @returns {string}
+ */
+function titleCase(str) {
+  return str.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+/**
  * Builds the submission payload from all submittable form elements.
  * Submit buttons are excluded. Checked radio/checkbox values are comma-joined
  * when multiple inputs share the same name; unchecked elements are omitted.
@@ -121,13 +143,15 @@ function showFieldTooltip(wrapper, message) {
 }
 
 /**
- * Finds the first invalid field wrapper in the form, in DOM order.
+ * Finds the first invalid field wrapper within a scope, in DOM order.
  * Validates required fields, required checkbox groups, and email format.
- * @param {HTMLFormElement} form
+ * Scoping to a single .form-step (rather than the whole form) is what lets
+ * multi-step forms validate only the currently visible step.
+ * @param {HTMLFormElement|HTMLElement} root - the form, or a single .form-step within it
  * @returns {{ el: HTMLElement, wrapper: HTMLElement, message: string }|null}
  */
-function getFirstInvalid(form) {
-  return Array.from(form.querySelectorAll('.field-wrapper')).reduce((found, wrapper) => {
+function getFirstInvalid(root) {
+  return Array.from(root.querySelectorAll('.field-wrapper')).reduce((found, wrapper) => {
     if (found) return found;
     const groupLabel = wrapper.querySelector('.checkbox-group-label.required');
     if (groupLabel) {
@@ -145,10 +169,11 @@ function getFirstInvalid(form) {
 
 /**
  * Creates a submit or plain button element.
- * Submit buttons validate the form on click, POST to the configured endpoint,
- * and handle the success redirect — either an inline plain-HTML fragment or a
- * full-page navigation. On failure the button is re-enabled and an error
- * message is appended below it.
+ * Submit buttons validate the current step (a .form-step ancestor, or the
+ * whole form for single-step forms) on click, POST to the configured
+ * endpoint, and handle the success redirect — either an inline plain-HTML
+ * fragment or a full-page navigation. On failure the button is re-enabled
+ * and an error message is appended below it.
  * @param {object} fd - field data object
  * @param {string} fd.Field - button name attribute
  * @param {string} fd.Type - 'submit' or 'button'
@@ -168,7 +193,8 @@ function createButton(fd) {
     button.addEventListener('click', async (event) => {
       event.preventDefault();
       const form = button.closest('form');
-      const invalid = getFirstInvalid(form);
+      const scope = button.closest('.form-step') || form;
+      const invalid = getFirstInvalid(scope);
       if (invalid) {
         showFieldTooltip(invalid.wrapper, invalid.message);
         invalid.el.focus();
@@ -190,7 +216,7 @@ function createButton(fd) {
             button.closest('.block').replaceWith(fragment);
             await loadBlocks(fragment);
           }
-        } else {
+        } else if (redirectTo) {
           window.location.href = redirectTo;
         }
       } else {
@@ -263,11 +289,11 @@ function createTextArea(fd) {
 }
 
 /**
- * Creates a <select> element populated from a newline-delimited options list.
+ * Creates a <select> element populated from Options (see parseOptions).
  * Prepends a disabled placeholder option as the default visible choice.
  * @param {object} fd - field data object
  * @param {string} fd.Field - name attribute value
- * @param {string} fd.Options - newline-delimited option labels (used as both label and value)
+ * @param {string} fd.Options - option labels (used as both label and value)
  * @param {string} [fd.Placeholder] - placeholder option text (falls back to "Select...")
  * @param {string} [fd.Mandatory] - 'x' marks the field as required
  * @returns {HTMLSelectElement}
@@ -284,10 +310,10 @@ function createSelect(fd) {
   ph.setAttribute('selected', '');
   ph.setAttribute('disabled', '');
   select.append(ph);
-  options.split('\n').forEach((o) => {
+  parseOptions(options).forEach((o) => {
     const option = document.createElement('option');
-    option.textContent = o.trim();
-    option.value = o.trim();
+    option.textContent = o;
+    option.value = o;
     select.append(option);
   });
   if (isRequired === 'x') select.setAttribute('required', 'required');
@@ -363,12 +389,28 @@ function createMessage(fd) {
 }
 
 /**
- * Creates a group of related checkboxes from a newline-delimited options list.
+ * Creates a helper-text paragraph for a field, e.g. "Please do not include
+ * parenthesis" under a Phone Number input. Applies to any field type via
+ * buildField, appended after the field's own control(s).
+ * @param {object} fd - field data object
+ * @param {string} [fd.Description] - helper text; no element is created if absent
+ * @returns {HTMLParagraphElement|undefined}
+ */
+function createDescription(fd) {
+  if (!fd.Description) return undefined;
+  const p = document.createElement('p');
+  p.className = 'field-description';
+  p.textContent = fd.Description;
+  return p;
+}
+
+/**
+ * Creates a group of related checkboxes from Options (see parseOptions).
  * Renders a shared group label followed by individual checkbox+label pairs.
  * @param {object} fd - field data object
  * @param {string} fd.Field - shared name attribute for all checkboxes in the group
  * @param {string} fd.Label - group label text
- * @param {string} fd.Options - newline-delimited option values
+ * @param {string} fd.Options - option values
  * @param {string} [fd.Mandatory] - 'x' marks the group as required
  * @returns {DocumentFragment}
  */
@@ -382,18 +424,56 @@ function createCheckboxGroup(fd) {
   groupLabel.textContent = legend;
   if (isRequired === 'x') groupLabel.classList.add('required');
   fragment.append(groupLabel);
-  options.split('\n').forEach((option, i) => {
-    const optionTrimmed = option.trim();
+  parseOptions(options).forEach((option, i) => {
     const item = document.createElement('div');
     item.classList.add('checkbox-item');
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.id = `${name}-${i}`;
     input.name = name;
-    input.value = optionTrimmed;
+    input.value = option;
     const label = document.createElement('label');
     label.setAttribute('for', `${name}-${i}`);
-    label.textContent = optionTrimmed;
+    label.textContent = option;
+    item.append(input, label);
+    fragment.append(item);
+  });
+  return fragment;
+}
+
+/**
+ * Creates a group of mutually-exclusive radio buttons from Options (see
+ * parseOptions). Structurally mirrors createCheckboxGroup, but inputs share
+ * a name (so only one can be selected) and use type="radio".
+ * @param {object} fd - field data object
+ * @param {string} fd.Field - shared name attribute for all radios in the group
+ * @param {string} fd.Label - group label text
+ * @param {string} fd.Options - option values
+ * @param {string} [fd.Mandatory] - 'x' marks the group as required
+ * @returns {DocumentFragment}
+ */
+function createRadioGroup(fd) {
+  const {
+    Field: name, Label: legend, Options: options, Mandatory: isRequired,
+  } = fd;
+  const fragment = document.createDocumentFragment();
+  const groupLabel = document.createElement('span');
+  groupLabel.classList.add('checkbox-group-label');
+  groupLabel.textContent = legend;
+  if (isRequired === 'x') groupLabel.classList.add('required');
+  fragment.append(groupLabel);
+  parseOptions(options).forEach((option, i) => {
+    const item = document.createElement('div');
+    item.classList.add('checkbox-item');
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.id = `${name}-${i}`;
+    input.name = name;
+    input.value = option;
+    if (isRequired === 'x') input.setAttribute('required', 'required');
+    const label = document.createElement('label');
+    label.setAttribute('for', `${name}-${i}`);
+    label.textContent = option;
     item.append(input, label);
     fragment.append(item);
   });
@@ -430,15 +510,17 @@ function applyRules(form, rules) {
 
 /**
  * Maps a field type to the ordered list of creator functions that build its DOM.
- * A checkbox field with Options renders as a group; all other types use the lookup table.
+ * A checkbox or radio field with Options renders as a group; all other
+ * types use the lookup table.
  * @param {object} fd - field data object
  * @param {string} fd.Type - field type from the content sheet
- * @param {string} [fd.Options] - presence triggers checkbox-group rendering
+ * @param {string} [fd.Options] - presence triggers group rendering for checkbox/radio
  * @returns {Array<Function>}
  */
 function getFieldFunctionsByType(fd) {
   const type = fd.Type || 'message';
   if (type === 'checkbox' && fd.Options) return [createCheckboxGroup];
+  if (type === 'radio' && fd.Options) return [createRadioGroup];
   const fieldType = {
     select: [createLabel, createSelect],
     heading: [createHeading],
@@ -454,8 +536,159 @@ function getFieldFunctionsByType(fd) {
 }
 
 /**
- * Fetches the form definition JSON, builds the <form> element with all fields,
- * wires up change-driven visibility rules, and attaches blur/input validation.
+ * Builds one field's wrapper (or row, when grouped via Style) and appends it
+ * to the given container. Shared by both single-step forms (container is the
+ * form itself) and multi-step forms (container is the current .form-step).
+ * @param {object} fd - field data object (mutated: fd.form is set)
+ * @param {HTMLFormElement} form - the form element, stored on fd for handlers that need it
+ * @param {HTMLElement} container - element to append the built field into
+ * @param {Array} rules - shared rules accumulator; visibility rules found on fd are pushed here
+ */
+const NON_LABEL_TYPES = new Set(['action', 'data']);
+
+/**
+ * Falls back to Value as the display label when Label is absent — the
+ * convention actually used across authored sheets (no separate Label
+ * column). Value is then cleared so createInput/createTextArea don't also
+ * treat it as a pre-filled value. Skipped for action/data rows, which use
+ * Value/Extra for their own non-label purpose (endpoint URL, stored data).
+ * @param {object} fd - field data object (mutated)
+ * @param {string} type - resolved field type
+ */
+function resolveLabel(fd, type) {
+  if (!fd.Label && fd.Value && !NON_LABEL_TYPES.has(type)) {
+    fd.Label = fd.Value;
+    delete fd.Value;
+  }
+}
+
+function buildField(fd, form, container, rules) {
+  fd.form = form;
+  const type = fd.Type || 'text';
+  resolveLabel(fd, type);
+  const { Style: theme, Rules: fieldRules } = fd;
+  const fieldClass = `form-${type}-wrapper${theme ? ` form-${theme}` : ''}`;
+  const fieldWrapper = document.createElement('div');
+  fieldWrapper.className = `${fieldClass} field-wrapper`;
+  getFieldFunctionsByType(fd).forEach((createField) => {
+    const field = createField(fd);
+    if (field) fieldWrapper.append(field);
+  });
+  const description = createDescription(fd);
+  if (description) fieldWrapper.append(description);
+  if (fieldRules) {
+    try {
+      rules.push({ fieldId: fieldClass, rule: JSON.parse(fieldRules) });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn(`Invalid Rule ${fieldRules}: ${e}`);
+    }
+  }
+  if (!fieldWrapper.children.length) return;
+  if (theme) {
+    const lastChild = container.lastElementChild;
+    if (lastChild?.dataset.rowStyle === theme) {
+      lastChild.append(fieldWrapper);
+    } else {
+      const row = document.createElement('div');
+      row.className = 'fields-row';
+      row.dataset.rowStyle = theme;
+      row.append(fieldWrapper);
+      container.append(row);
+    }
+  } else {
+    container.append(fieldWrapper);
+  }
+}
+
+/**
+ * Builds a multi-step form: one .form-step per sheet (in :names order,
+ * excluding "config"), auto-generated Back/Next navigation gated on
+ * per-step validation, and a progress indicator. The final step's own
+ * submit button (authored in its sheet) performs the real submission.
+ * The "config" sheet supplies key/value settings — currently just
+ * "endpoint", the POST target (falls back to the placeholder-configured
+ * default, same as single-step forms, if absent).
+ * @param {object} json - the fetched multi-sheet JSON
+ * @param {HTMLFormElement} form
+ * @returns {Array} rules - visibility rules collected across all steps
+ */
+function buildMultiStepForm(json, form) {
+  const rules = [];
+  const configMap = {};
+  (json.config?.data ?? []).forEach(({ key, value }) => { configMap[key] = value; });
+  form.dataset.action = configMap.endpoint || t('Form Submit Endpoint', 'https://api.example.com/forms/submit');
+
+  const stepNames = (json[':names'] ?? Object.keys(json)).filter((name) => name !== 'config');
+
+  const progress = document.createElement('div');
+  progress.className = 'form-progress';
+  form.append(progress);
+
+  const steps = stepNames.map((stepName, stepIndex) => {
+    const step = document.createElement('div');
+    step.className = 'form-step';
+    step.dataset.step = stepName;
+    if (stepIndex > 0) step.classList.add('hidden');
+
+    const heading = document.createElement('h2');
+    heading.textContent = titleCase(stepName);
+    step.append(heading);
+
+    (json[stepName]?.data ?? []).forEach((fd) => {
+      buildField(fd, form, step, rules);
+    });
+
+    form.append(step);
+    return step;
+  });
+
+  const showStep = (index) => {
+    steps.forEach((step, i) => step.classList.toggle('hidden', i !== index));
+    progress.textContent = t('Step {0} of {1}', `Step ${index + 1} of ${steps.length}`)
+      .replace('{0}', index + 1).replace('{1}', steps.length);
+    applyRules(form, rules);
+  };
+
+  steps.forEach((step, index) => {
+    const nav = document.createElement('div');
+    nav.className = 'form-step-nav';
+    if (index > 0) {
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'button form-step-back';
+      back.textContent = t('Back');
+      back.addEventListener('click', () => showStep(index - 1));
+      nav.append(back);
+    }
+    if (index < steps.length - 1) {
+      const next = document.createElement('button');
+      next.type = 'button';
+      next.className = 'button form-step-next';
+      next.textContent = t('Next');
+      next.addEventListener('click', () => {
+        const invalid = getFirstInvalid(step);
+        if (invalid) {
+          showFieldTooltip(invalid.wrapper, invalid.message);
+          invalid.el.focus();
+          return;
+        }
+        showStep(index + 1);
+      });
+      nav.append(next);
+    }
+    if (nav.children.length) step.append(nav);
+  });
+
+  showStep(0);
+  return rules;
+}
+
+/**
+ * Fetches the form definition JSON and builds the <form> element. Dispatches
+ * to a single flat field list (single-step) or a multi-step build (when the
+ * JSON is a DA multi-sheet document, `:type === "multi-sheet"`), wires up
+ * change-driven visibility rules, and attaches blur/input validation.
  * @param {URL} formURL - URL of the form definition JSON
  * @returns {Promise<HTMLFormElement>}
  */
@@ -464,44 +697,18 @@ async function createForm(formURL) {
   const resp = await fetch(pathname);
   const json = await resp.json();
   const form = document.createElement('form');
-  const rules = [];
-  form.dataset.action = t('Form Submit Endpoint', 'https://api.netcentric.biz/forms/submit');
+  form.dataset.action = t('Form Submit Endpoint', 'https://api.example.com/forms/submit');
   form.id = pathname.split('/').pop().replace('.json', '');
-  json.data.forEach((fd) => {
-    fd.form = form;
-    const type = fd.Type || 'text';
-    const { Style: theme, Rules: fieldRules } = fd;
-    const fieldClass = `form-${type}-wrapper${theme ? ` form-${theme}` : ''}`;
-    const fieldWrapper = document.createElement('div');
-    fieldWrapper.className = `${fieldClass} field-wrapper`;
-    getFieldFunctionsByType(fd).forEach((createField) => {
-      const field = createField(fd);
-      if (field) fieldWrapper.append(field);
-    });
-    if (fieldRules) {
-      try {
-        rules.push({ fieldId: fieldClass, rule: JSON.parse(fieldRules) });
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn(`Invalid Rule ${fieldRules}: ${e}`);
-      }
-    }
-    if (!fieldWrapper.children.length) return;
-    if (theme) {
-      const lastChild = form.lastElementChild;
-      if (lastChild?.dataset.rowStyle === theme) {
-        lastChild.append(fieldWrapper);
-      } else {
-        const row = document.createElement('div');
-        row.className = 'fields-row';
-        row.dataset.rowStyle = theme;
-        row.append(fieldWrapper);
-        form.append(row);
-      }
-    } else {
-      form.append(fieldWrapper);
-    }
-  });
+
+  let rules;
+  if (json[':type'] === 'multi-sheet') {
+    form.classList.add('is-multi-step');
+    rules = buildMultiStepForm(json, form);
+  } else {
+    rules = [];
+    json.data.forEach((fd) => buildField(fd, form, form, rules));
+  }
+
   form.noValidate = true;
   form.addEventListener('change', () => applyRules(form, rules));
   applyRules(form, rules);
