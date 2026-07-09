@@ -1,0 +1,239 @@
+main .form input,
+main .form textarea,
+main .form select {
+  border: 1px solid rgba(0 0 0 / 10%);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  line-height: 1.5;
+  color: var(--c-dark-plum);
+  padding: 10px 16px;
+  border-radius: 3px;
+  width: 100%;
+  max-width: 50rem;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+main .form textarea {
+  min-height: 46px;
+  resize: vertical;
+}
+
+main .form input:hover,
+main .form input:focus,
+main .form textarea:hover,
+main .form textarea:focus,
+main .form select:hover,
+main .form select:focus {
+  border-color: var(--c-dark-plum);
+  outline: 0;
+}
+
+main .form label {
+  width: 100%;
+  font-size: var(--body-font-size-m);
+  color: var(--c-dark-plum);
+  display: block;
+}
+
+main .form label.required::after,
+main .form .checkbox-group-label.required::after {
+  content: ' *';
+  color: var(--c-dark-plum);
+}
+
+main .form .field-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 600px) {
+  main .form .field-wrapper {
+    margin-bottom: 36px;
+  }
+}
+
+/* Multi-column row grouping (fields sharing the same Style value) */
+main .form .fields-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+main .form .fields-row .field-wrapper {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  margin-bottom: 20px;
+}
+
+main .form .fields-row .field-wrapper input,
+main .form .fields-row .field-wrapper select,
+main .form .fields-row .field-wrapper textarea {
+  max-width: none;
+}
+
+@media (min-width: 600px) {
+  main .form .fields-row {
+    flex-direction: row;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+
+  main .form .fields-row .field-wrapper {
+    margin-bottom: 0;
+  }
+}
+
+/* Checkbox group label (for multi-option checkboxes) */
+main .form .checkbox-group-label {
+  display: block;
+  font-size: var(--body-font-size-m);
+  color: var(--c-dark-plum);
+  margin-bottom: 8px;
+}
+
+/* Checkbox wrapper: block layout for both single and group */
+main .form .form-checkbox-wrapper {
+  display: block;
+}
+
+/* Hide native checkbox input off-screen */
+main .form .form-checkbox-wrapper input[type='checkbox'],
+main .form .checkbox-item input[type='checkbox'] {
+  position: absolute;
+  left: -9999px;
+}
+
+/* Label styling for both single checkbox and checkbox group items */
+main .form .form-checkbox-wrapper label {
+  position: relative;
+  display: block;
+  padding: 0 0 8px 32px;
+  font-weight: normal;
+  text-transform: none;
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--body-font-size-m);
+  color: var(--c-dark-plum);
+}
+
+/* Custom checkbox box */
+main .form .form-checkbox-wrapper label::before {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  border: 1px solid rgba(0 0 0 / 10%);
+  border-radius: 3px;
+  content: '';
+}
+
+/* Hover state for custom checkbox */
+main .form .form-checkbox-wrapper label:hover::before {
+  border-color: var(--c-dark-plum);
+}
+
+/* Checked state for custom checkbox */
+main .form .form-checkbox-wrapper > input[type='checkbox']:checked + label::before,
+main .form .checkbox-item input[type='checkbox']:checked + label::before {
+  background-color: var(--c-dark-plum);
+  border-color: var(--c-dark-plum);
+  /* stylelint-disable-next-line function-url-quotes */
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="-6527.959 872.109 12.577 12.688"%3E%3Cpath fill="none" stroke="%23fff" stroke-width="2px" d="M-6527.166%2C877.783l3.155%2C4.117%2C7.828-10.433" transform="translate%280 1.243%29"/%3E%3C%2Fsvg%3E');
+  background-size: 12px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Individual checkbox item container (multi-option groups) */
+main .form .checkbox-item {
+  position: relative;
+}
+
+/* Submit / action button */
+main .form .button {
+  display: inline-block;
+  width: 100%;
+  max-width: 50rem;
+  margin-top: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c-white);
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  padding: 8px 35px;
+  cursor: pointer;
+  background-color: var(--c-dark-plum);
+  border: 1px solid var(--c-dark-plum);
+  border-radius: 30px;
+}
+
+main .form .button:focus,
+main .form .button:hover {
+  color: var(--c-dark-plum);
+  background-color: transparent;
+  outline: 0;
+}
+
+@media (min-width: 770px) {
+  main .form .button {
+    width: auto;
+  }
+}
+
+main .form .form-submit-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+main .form .form-error {
+  margin-top: 12px;
+  color: #db204c;
+  font-size: var(--body-font-size-m);
+}
+
+/* Validation tooltip — matches Marketo's mktoError style */
+main .form .field-tooltip {
+  position: absolute;
+  top: calc(100% + 15px);
+  left: 0;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+main .form .field-tooltip.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+main .form .field-tooltip-arrow-wrap {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+}
+
+main .form .field-tooltip-arrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 15px 15px;
+  border-color: transparent transparent #db204c;
+}
+
+main .form .field-tooltip-msg {
+  min-width: 150px;
+  max-width: 300px;
+  padding: 10px;
+  color: var(--c-white);
+  background-color: #db204c;
+  border-radius: 3px;
+  font-size: var(--body-font-size-m);
+}

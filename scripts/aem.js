@@ -649,6 +649,43 @@ async function loadSections(element) {
   }
 }
 
+/**
+ * Gets placeholders object
+ * @param {string} prefix
+ */
+export async function fetchPlaceholders(prefix = 'default') {
+  window.placeholders = window.placeholders || {};
+  const loaded = window.placeholders[`${prefix}-loaded`];
+  const languagePath = '/';
+
+  if (!loaded) {
+    window.placeholders[`${prefix}-loaded`] = new Promise((resolve, reject) => {
+      try {
+        fetch(`${prefix === 'default' ? '' : prefix}${languagePath}/placeholders.json`)
+          .then((resp) => resp.json())
+          .then((json) => {
+            const placeholders = {};
+            json.data.forEach((placeholder) => {
+              placeholders[toCamelCase(placeholder.Key)] = placeholder.Text;
+            });
+            window.placeholders[prefix] = placeholders;
+            resolve();
+          })
+          .catch(() => {
+            window.placeholders[prefix] = {};
+            resolve();
+          });
+      } catch (error) {
+        // error loading placeholders
+        window.placeholders[prefix] = {};
+        reject();
+      }
+    });
+  }
+  await window.placeholders[`${prefix}-loaded`];
+  return window.placeholders[prefix];
+}
+
 init();
 
 export {
